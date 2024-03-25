@@ -9,7 +9,9 @@ void main() {
 }
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  HomeScreen({super.key});
+
+  final formData = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,57 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
         tooltip: 'Wprowadz nowy pomiar',
-        onPressed: () {},
+        onPressed: () {
+          showModalBottomSheet(
+              isDismissible: false,
+              context: context,
+              builder: (context) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(
+                      bottom: MediaQuery.of(context).viewInsets.bottom),
+                  child: Form(
+                      key: formData,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextFormField(
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            decoration: const InputDecoration(
+                                hintText: "Wprowadz nowy pomiar",
+                                label: Text("Waga")),
+                            validator: (value) {
+                              if (value == null ||
+                                  value.isEmpty ||
+                                  double.tryParse(value) == null ||
+                                  double.tryParse(value)! <= 0) {
+                                return "Wprowadzona waga jest niepoprawna.";
+                              }
+                              return null;
+                            },
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                  onPressed: () {
+                                    if (formData.currentState!.validate()) {
+                                      Navigator.of(context).pop();
+                                    }
+                                  },
+                                  child: const Text("Zapisz")),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text("Zamknij"))
+                            ],
+                          )
+                        ],
+                      )),
+                );
+              });
+        },
         child: const Icon(
           Icons.add,
           color: Colors.white,
