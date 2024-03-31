@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -15,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<double> weightList = [];
+  final List<WeightData> weightList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +30,11 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.green,
         tooltip: 'Wprowadz nowy pomiar',
         onPressed: () {
-          showModalBottomSheet<double>(
+          showModalBottomSheet<WeightData>(
               isDismissible: false,
               context: context,
               builder: (context) {
-                return WeightForm();
+                return const WeightForm();
               }).then((value) => {
                 if (value != null)
                   {
@@ -51,8 +52,15 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: ListView.separated(
           itemBuilder: (BuildContext context, int index) {
+            final weight = weightList[index];
             return ListTile(
-              title: Text('${weightList[index]}'),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(DateFormat("MM.dd.yyyy").format(weight.createdAt)),
+                  Text('${weight.amount}'),
+                ],
+              ),
             );
           },
           separatorBuilder: (context, index) => const Divider(
@@ -68,6 +76,13 @@ class WeightForm extends StatefulWidget {
 
   @override
   State<WeightForm> createState() => _WeightFormState();
+}
+
+class WeightData {
+  final double amount;
+  final DateTime createdAt;
+
+  WeightData({required this.amount, required this.createdAt});
 }
 
 class _WeightFormState extends State<WeightForm> {
@@ -110,7 +125,8 @@ class _WeightFormState extends State<WeightForm> {
                       onPressed: () {
                         if (formData.currentState!.validate()) {
                           formData.currentState!.save();
-                          Navigator.of(context).pop(newWeight);
+                          Navigator.of(context).pop(WeightData(
+                              amount: newWeight!, createdAt: DateTime.now()));
                         }
                       },
                       child: const Text("Zapisz")),
