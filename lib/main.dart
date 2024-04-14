@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:weight_tracker/db/repository/weight_repository.dart';
+
+import 'db/model/weight.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -16,7 +19,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<WeightData> weightList = [];
+  final List<Weight> weightList = [];
+  final WeightRepository repository = WeightRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    repository.getAll().then((value) => setState(() {
+          weightList.addAll(value);
+        }));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.green,
         tooltip: 'Wprowadz nowy pomiar',
         onPressed: () {
-          showModalBottomSheet<WeightData>(
+          showModalBottomSheet<double>(
               isDismissible: false,
               context: context,
               builder: (context) {
@@ -38,9 +50,11 @@ class _HomeScreenState extends State<HomeScreen> {
               }).then((value) => {
                 if (value != null)
                   {
-                    setState(() {
-                      weightList.insert(0, value);
-                    })
+                    repository.create(value).then((weight) => {
+                          setState(() {
+                            weightList.insert(0, weight);
+                          })
+                        })
                   }
               });
         },
@@ -50,23 +64,27 @@ class _HomeScreenState extends State<HomeScreen> {
           size: 30,
         ),
       ),
-      body: ListView.separated(
-          itemBuilder: (BuildContext context, int index) {
-            final weight = weightList[index];
-            return ListTile(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(DateFormat("MM.dd.yyyy").format(weight.createdAt)),
-                  Text('${weight.amount}'),
-                ],
-              ),
-            );
-          },
-          separatorBuilder: (context, index) => const Divider(
-                color: Colors.black,
-              ),
-          itemCount: weightList.length),
+      body: weightList.isEmpty
+          ? const Center(
+              child: Text('Wprowadz aktualną wagę.'),
+            )
+          : ListView.separated(
+              itemBuilder: (BuildContext context, int index) {
+                final weight = weightList[index];
+                return ListTile(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text(DateFormat("MM.dd.yyyy").format(weight.createdAt)),
+                      Text('${weight.amount}'),
+                    ],
+                  ),
+                );
+              },
+              separatorBuilder: (context, index) => const Divider(
+                    color: Colors.black,
+                  ),
+              itemCount: weightList.length),
     );
   }
 }
@@ -76,13 +94,6 @@ class WeightForm extends StatefulWidget {
 
   @override
   State<WeightForm> createState() => _WeightFormState();
-}
-
-class WeightData {
-  final double amount;
-  final DateTime createdAt;
-
-  WeightData({required this.amount, required this.createdAt});
 }
 
 class _WeightFormState extends State<WeightForm> {
@@ -125,8 +136,7 @@ class _WeightFormState extends State<WeightForm> {
                       onPressed: () {
                         if (formData.currentState!.validate()) {
                           formData.currentState!.save();
-                          Navigator.of(context).pop(WeightData(
-                              amount: newWeight!, createdAt: DateTime.now()));
+                          Navigator.of(context).pop(newWeight!);
                         }
                       },
                       child: const Text("Zapisz")),
