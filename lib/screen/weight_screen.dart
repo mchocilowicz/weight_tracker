@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:weight_tracker/db/model/weight.dart';
@@ -26,7 +27,9 @@ class _WeightScreenState extends State<WeightScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: AppBar(actions: [IconButton(icon: const Icon(Icons.logout), onPressed: () {
+        FirebaseAuth.instance.signOut();
+      },)],
         title: const Text('Weight Tracker'),
         backgroundColor: Colors.green,
         centerTitle: true,

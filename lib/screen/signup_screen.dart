@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 
-class LoginScreen extends StatefulWidget {
-  final VoidCallback onCreate;
-  final Function(String, String) onLogin;
+class SignUpScreen extends StatefulWidget {
+  final Function(String, String) onSignUp;
 
-  const LoginScreen({super.key, required this.onLogin, required this.onCreate});
+  const SignUpScreen({super.key,required this.onSignUp});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   String? email;
   String? password;
 
@@ -66,19 +65,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         if (_loginForm.currentState!.validate()) {
                           _loginForm.currentState!.save();
-                          widget.onLogin(email!, password!);
+                          widget.onSignUp(email!,password!);
                         }
                       },
-                      child: const Text("Zaloguj")),
+                      child: const Text("Stwórz konto")),
                 ),
-                SizedBox(
-                  height: 50,
-                ),
-                TextButton(
-                    onPressed: () {
-                      widget.onCreate();
-                    },
-                    child: const Text("Stwórz konto")),
               ],
             )),
       ),
